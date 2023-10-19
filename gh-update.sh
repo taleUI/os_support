@@ -59,9 +59,9 @@ if [ -n "$1" ]; then
         echo "No debug support check"
         updatecheck
         ;;
-    '')
-	    echo "Option not passed"
-        ;;
     esac
     shift
+else
+    echo "No option passed."
+    exit 255
 fi
