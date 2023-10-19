@@ -26,6 +26,7 @@ updatecheck(){
             CURL_ARGS="---http1.1 -L -H \"Authorization: Bearer $(cat /etc/gh-update-token)\" -s \"${endpoint}\""
         else
             echo -e "You are on an internal build without an authorization to\nthe update endpoint.\nPlease pipe your valid Github token to /etc/gh-update-token via echo."
+            exit 0
         fi
     fi
     curl $CURL_ARGS | get_img_details
@@ -50,7 +51,7 @@ if [ -n "$1" ]; then
         if [[ -f "/tmp/gh-update-temparg" ]]; then
             gh-update-os --apply /tmp/gh-update-temparg
         else
-            echo "No update arguments set. Checking for updates..."
+            echo -e "No update arguments set. Checking for updates...\n"
             updatecheck
         fi
         ;;
@@ -58,10 +59,9 @@ if [ -n "$1" ]; then
         echo "No debug support check"
         updatecheck
         ;;
-    '*')
+    '')
 	    echo "Option not passed"
         ;;
     esac
     shift
-fi
 fi
