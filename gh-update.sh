@@ -13,8 +13,28 @@ get_img_details(){
         UPDATE_AVAILABLE=False
         REPORTMSG="System up to date."
     else
+        echo -e "OS_TAG_NAME=$os_tag_name\nDL_IMG=$download_img_url\nDL_SHA=$download_sha256_url" > /tmp/gh-update-temparg
         UPDATE_AVAILABLE=True
         REPORTMSG=$(echo -e "Update available. OS Update: ${os_tag_name}")
+    fi
+}
+
+updatecheck(){
+    CURL_ARGS="--http1.1 -L -s \"${endpoint}\""
+    if [[ "${releasepath}" =~ "int" ]]; then
+        if [[ -f "/etc/gh-update-token" ]]; then
+            CURL_ARGS="---http1.1 -L -H \"Authorization: Bearer $(cat /etc/gh-update-token)\" -s \"${endpoint}\""
+        else
+            echo -e "You are on an internal build without an authorization to\nthe update endpoint.\nPlease pipe your valid Github token to /etc/gh-update-token via echo."
+        fi
+    fi
+    curl $CURL_ARGS | get_img_details
+    if [[ "${UPDATE_AVAILABLE}" == "True" ]]; then
+        echo "${REPORTMSG}"
+        exit 1
+    else
+        echo "${REPORTMSG}"
+        exit 7
     fi
 }
 
