@@ -31,7 +31,7 @@ cleandeployments(){
     for deployment in $DEPLOYMENTS_PATH;
     do
         if [[ "$CURR_DEPLOYMENT" == "$deployment" ]]; then
-            echo "Ignoring deployment $CURR_DEPLOYMENT, as it's currently used."
+            echo "Ignoring deployment $deployment, as it's currently used."
         else
             btrfs subvolume delete /gh_root/$deployment
         fi
