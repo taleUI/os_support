@@ -41,9 +41,9 @@ cleandeployments(){
 finalizeupd(){
     mkdir -p ${installpath}
     mount -t btrfs -o subvol=rootfs/${OS_TAG_NAME} -L gh_root ${installpath}
-    arch-chroot ${installpath} "gh-readonly disable"
-    arch-chroot ${installpath} "gh-grub-update"
-    arch-chroot ${installpath} "gh-readonly enable"
+    arch-chroot ${installpath} gh-readonly disable
+    arch-chroot ${installpath} gh-grub-update
+    arch-chroot ${installpath} gh-readonly enable
     umount -l ${installpath}
     echo "Cleaning up..."
     rm -rf ${downloadpath}/${OS_TAG_NAME}/
