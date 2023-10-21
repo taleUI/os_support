@@ -7,13 +7,15 @@ releasepath=$(cat /etc/gh-update-branch)
 endpoint=https://api.github.com/repos/taleUI/releases_${releasepath}/releases
 downloadpath=/home/.gh_offload/updatecontainer
 
+source /etc/os-release
+
 get_img_details(){
     stdout=$(jq 'sort_by(.created_at) | reverse')
     stdout=$(echo "${stdout}" | jq 'del(.[] | select(.assets[].state != "uploaded"))')
     os_tag_name=$(echo "${stdout}" | jq -er '[ .[] | select(.prerelease==false) ] | first | .tag_name')
     download_img_id=$(echo "${stdout}" | jq -er '[ .[] | select(.prerelease==false) ] | first | .assets[] | .url' | head -n1)
     download_sha_id=$(echo "${stdout}" | jq -er '[ .[] | select(.prerelease==false) ] | first | .assets[] | .url' | tail -n1)
-    if [[ "${os_tag_name}" == "$(cat /etc/os-release | grep VARIANT_ID | cut -d '=' -f 2)" ]]; then
+    if [[ "${os_tag_name}" == "${VARIANT_ID}" ]]; then
         echo "System up to date."
     else
         echo -e "OS_TAG_NAME=$os_tag_name\nDL_IMG=$download_img_url\nDL_SHA=$download_sha256_url\nGH_IMG_DL=$download_img_id\nGH_SHA_DL=$download_sha_id" > ${argdata}
@@ -91,13 +93,13 @@ if [ -n "$1" ]; then
         ;;
     "apply-now")
         if [[ -f "${ready_watcher}" ]]; then
-            gh-update-os --apply ${argdata}
+            gh-update-os ${argdata}
             exit 7
         fi
         if [[ -f "${argdata}" ]]; then
             dlupd
             if [[ -f "${ready_watcher}" ]]; then
-                gh-update-os --apply ${argdata}
+                gh-update-os ${argdata}
                 exit 7
             fi
         else
@@ -105,7 +107,7 @@ if [ -n "$1" ]; then
             updatecheck
             dlupd
             if [[ -f "${ready_watcher}" ]]; then
-                gh-update-os --apply ${argdata}
+                gh-update-os ${argdata}
                 exit 7
             fi
         fi
