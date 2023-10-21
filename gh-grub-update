@@ -3,11 +3,6 @@ if [[ $EUID -ne 0 ]];
 then
     exec pkexec --disable-internal-agent "$0" "$@"
 fi
-if [[ -f "/dev/disk/by-label/gh_efi" ]]; then
-    mount -L gh_efi /boot/efi
-    grub-install --target=x86_64-efi --efi-directory=/boot/efi
-    grub-mkconfig -o /boot/grub/grub.cfg
-else
-    echo "Invalid partition layout detected."
-    exit 1
-fi
+mount -L gh_efi /boot/efi
+grub-install --target=x86_64-efi --efi-directory=/boot/efi
+grub-mkconfig -o /boot/grub/grub.cfg
