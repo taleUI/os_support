@@ -28,7 +28,7 @@ finalizeupd(){
     arch-chroot ${installpath} "gh-readonly enable"
     umount -l ${installpath}
     echo "Cleaning up..."
-    rm -rf ${downloadpath}/${OS_TAG_NAME}/${OS_TAG_NAME}.img.zst
+    rm -rf ${downloadpath}/${OS_TAG_NAME}/
     echo "Update complete."
 }
 
