@@ -45,6 +45,8 @@ if [[ -f ${argdata} ]]; then
         installpath=/gh_root/rootfs/${OS_TAG_NAME}
         verintg
         beginupd
+    else
+        echo -e "Arg data was found, but ready to update sentinel was not found.\nAre you sure that the update container download was completed?\nTry running [38;2;23;147;209mgh-update download-update[0m to verify container integrity again."
     fi
 else
     echo "No deploy arguments set."
