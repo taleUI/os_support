@@ -1,0 +1,23 @@
+#!/bin/bash
+ARG=$1
+ARGREADONLY=$(btrfs property get / | grep ro= | cut -d '=' -f 2)
+
+if [[ "${ARG}" == "enable" ]]; then
+    if [[ "${ARGREADONLY}" == "true" ]]; then
+        echo "Read-only mode is already enabled"
+        exit 1
+    else
+        mount -o ro,remount /
+        btrfs property set -f / ro true
+    fi
+elif [[ "${ARG}" == "disable" ]]; then
+    if [[ "${ARGREADONLY}" == "false" ]]; then
+        echo "Read-write mode is already enabled"
+        exit 1
+    else
+        mount -o rw,remount /
+        btrfs property set -f / ro false
+    fi
+else
+    echo "Unrecognized option."
+fi
