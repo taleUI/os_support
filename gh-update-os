@@ -25,6 +25,19 @@ verintg(){
     fi
 }
 
+cleandeployments(){
+    DEPLOYMENTS_PATH=$(btrfs subvolume list /gh_root | awk '{print $9}')
+    CURR_DEPLOYMENT=$(mount | grep subvol=/rootfs | sed 's/.*subvol=\///g' | sed 's/)//g')
+    for deployment in $DEPLOYMENTS_PATH;
+    do
+        if [[ "$CURR_DEPLOYMENT" == "$deployment" ]]; then
+            echo "Ignoring deployment $CURR_DEPLOYMENT, as it's currently used."
+        else
+            btrfs subvolume delete /gh_root/$deployment
+        fi
+    done
+}
+
 finalizeupd(){
     mkdir -p ${installpath}
     mount -t btrfs -o subvol=rootfs/${OS_TAG_NAME} -L gh_root ${installpath}
@@ -41,6 +54,8 @@ beginupd(){
     # Decompress update container
     echo "Decompressing update container..."
     zstd -df ${installcontainer}
+    echo "Removing the unused snapshot..."
+    cleandeployments
     echo "Installing snapshot..."
     btrfs receive /gh_root/rootfs/ < ${installfile}
     finalizeupd
