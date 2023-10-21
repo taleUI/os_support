@@ -5,8 +5,8 @@ then
 fi
 ARG=$1
 if [[ "${ARG}" == "enable" ]]; then
-    mount -o ro,remount /
     btrfs property set -f / ro true
+    mount -o ro,remount /
 elif [[ "${ARG}" == "disable" ]]; then
     mount -o rw,remount /
     btrfs property set -f / ro false
