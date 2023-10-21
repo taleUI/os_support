@@ -1,1 +1,52 @@
 #!/bin/bash
+# A duplicate of gh-update-os, except this one serves the purpose of applying the actual update
+argdata=$1
+ready_watcher=/tmp/gh-update-ready-to-deploy
+downloadpath=/home/.gh_offload/updatecontainer
+# We assume we entered this step only after confirming that we are okay to continue.
+verintg(){
+    echo "Starting to update..."
+    if [[ -f "${installcontainer}" ]]; then
+        CURR_SHA=$(echo $(sha256sum ${installcontainer}) | awk '{print $1}')
+        if [[ "${CURR_SHA}" == "$(cat ${installcontainer}.sha256)" ]]; then
+            echo "Validity matches. Continuing to next step."
+        else
+            rm -rf ${downloadpath}/${OS_TAG_NAME}
+               echo "Verification failed. Download contents erased."
+               exit 1
+        fi
+    else
+        echo "Unable to find update container. (Download issues?)"
+    fi
+}
+
+finalizeupd(){
+    mkdir ${installpath}
+    mount -t btrfs -o subvol=rootfs/${OS_TAG_NAME} -L gh_root ${installpath}
+    arch-chroot ${installpath} "gh-readonly disable"
+    arch-chroot ${installpath} "gh-grub-update"
+    arch-chroot ${installpath} "gh-readonly enable"
+    echo "Update complete."
+}
+
+beginupd(){
+    # Decompress update container
+    echo "Decompressing update container..."
+    zstd -df ${installcontainer}
+    echo "Installing snapshot..."
+    btrfs receive /gh_root/rootfs/ < ${installcontainer}
+    finalizeupd
+}
+
+if [[ -f ${argdata} ]]; then
+    if [[ -f "${ready_watcher}" ]]; then
+        source ${argdata}
+        installcontainer=${downloadpath}/${OS_TAG_NAME}/${OS_TAG_NAME}.img.zst
+        installpath=/gh_root/rootfs/${OS_TAG_NAME}
+        verintg
+        beginupd
+    fi
+else
+    echo "No deploy arguments set."
+    exit 1
+fi
