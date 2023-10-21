@@ -1,5 +1,9 @@
 #!/bin/bash
 # A duplicate of gh-update-os, except this one serves the purpose of applying the actual update
+if [[ $EUID -ne 0 ]];
+then
+    exec pkexec --disable-internal-agent "$0" "$@"
+fi
 argdata=$1
 ready_watcher=/tmp/gh-update-ready-to-deploy
 downloadpath=/home/.gh_offload/updatecontainer
@@ -17,6 +21,7 @@ verintg(){
         fi
     else
         echo "Unable to find update container. (Download issues?)"
+        exit 1
     fi
 }
 
@@ -37,7 +42,7 @@ beginupd(){
     echo "Decompressing update container..."
     zstd -df ${installcontainer}
     echo "Installing snapshot..."
-    btrfs receive /gh_root/rootfs/ < ${installcontainer}
+    btrfs receive /gh_root/rootfs/ < ${installfile}
     finalizeupd
 }
 
@@ -45,6 +50,7 @@ if [[ -f ${argdata} ]]; then
     if [[ -f "${ready_watcher}" ]]; then
         source ${argdata}
         installcontainer=${downloadpath}/${OS_TAG_NAME}/${OS_TAG_NAME}.img.zst
+        installfile=${downloadpath}/${OS_TAG_NAME}/${OS_TAG_NAME}.img
         installpath=/tmp/mounts/${OS_TAG_NAME}
         verintg
         beginupd
