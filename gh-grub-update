@@ -6,3 +6,4 @@ fi
 mount -L gh_efi /boot/efi
 grub-install --target=x86_64-efi --efi-directory=/boot/efi
 grub-mkconfig -o /boot/grub/grub.cfg
+umount -l /boot/efi
