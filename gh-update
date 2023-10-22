@@ -13,7 +13,7 @@ downloadpath=/home/.gh_offload/updatecontainer
 source /etc/os-release
 
 get_img_details(){
-    stdout=$(jq 'sort_by(.created_at) | reverse')
+    stdout=$(jq)
     stdout=$(echo "${stdout}" | jq 'del(.[] | select(.assets[].state != "uploaded"))')
     os_tag_name=$(echo "${stdout}" | jq -er '[ .[] | select(.prerelease==false) ] | first | .tag_name')
     download_img_id=$(echo "${stdout}" | jq -er '[ .[] | select(.prerelease==false) ] | first | .assets[] | .url' | head -n1)
